@@ -15,19 +15,22 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { Mail, Lock, Github } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { toast } = useToast();
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // TODO: Implement actual login logic
+    // Bypass authentication for now
     toast({
-      title: "Login Attempted",
-      description: "Authentication will be implemented in the next phase",
+      title: "Login successful",
+      description: "Welcome back!",
     });
+    router.push("/dashboard");
   };
 
   return (
