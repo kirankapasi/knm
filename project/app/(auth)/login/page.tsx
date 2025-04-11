@@ -25,12 +25,32 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // Bypass authentication for now
-    toast({
-      title: "Login successful",
-      description: "Welcome back!",
-    });
-    router.push("/dashboard");
+    try {
+      const response = await fetch("http://localhost:3200/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Login failed");
+      }
+
+      toast({
+        title: "Login successful",
+        description: "Welcome back!",
+      });
+      router.push("/dashboard");
+    } catch (error) {
+      console.error("Login failed:", error);
+      toast({
+        title: "Login failed",
+        description: "Please check your credentials and try again.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (
