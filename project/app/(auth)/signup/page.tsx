@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -12,18 +12,44 @@ import { UserPlus } from "lucide-react";
 export default function SignupPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   async function onSubmit(event: React.FormEvent) {
     event.preventDefault();
+    if (!email.includes("@")) {
+      setErrorMessage("Please enter a valid email address.");
+      return;
+    }
+    if (password !== confirmPassword) {
+      setErrorMessage("Passwords do not match.");
+      return;
+    }
     setIsLoading(true);
 
     try {
-      // Add signup logic here
+      const response = await fetch("http://localhost:3200/api/auth/signup", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password, role }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Signup failed");
+      }
+
       router.push("/");
     } catch (error) {
       console.error("Signup failed:", error);
+      setErrorMessage("Signup failed. Please try again.");
     } finally {
       setIsLoading(false);
+      setErrorMessage("");
     }
   }
 
@@ -47,9 +73,26 @@ export default function SignupPage() {
                 id="email"
                 type="email"
                 placeholder="name@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={isLoading}
               />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                required
+                disabled={isLoading}
+                className="w-full border border-gray-300 rounded-md shadow-sm focus:ring-primary focus:border-primary"
+              >
+                <option value="" disabled>Select your role</option>
+                <option value="user">User</option>
+                <option value="admin">Admin</option>
+              </select>
             </div>
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
@@ -72,6 +115,12 @@ export default function SignupPage() {
               />
             </div>
           </CardContent>
+        </form>
+          {errorMessage && (
+            <div className="text-red-500 text-center mb-4">
+              {errorMessage}
+            </div>
+          )}
           <CardFooter className="flex flex-col space-y-4">
             <Button 
               type="submit" 
@@ -90,8 +139,7 @@ export default function SignupPage() {
               </Link>
             </p>
           </CardFooter>
-        </form>
       </Card>
     </div>
   );
-}
+};
